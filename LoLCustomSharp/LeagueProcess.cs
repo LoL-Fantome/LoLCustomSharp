@@ -34,6 +34,9 @@ namespace LoLCustomSharp
         [DllImport("kernel32.dll")]
         private static extern bool WriteProcessMemory(int hProcess, uint lpBaseAddress, byte[] lpBuffer, int dwSize, out uint lpNumberOfBytesWritten);
 
+        [DllImport("ntdll.dll", SetLastError = true)]
+        private static extern int NtWriteVirtualMemory(int hProcess, uint lpBaseAddress, byte[] lpBuffer, int dwSize, out uint lpNumberOfBytesWritten);
+
         [DllImport("kernel32.dll")]
         private static extern bool VirtualProtectEx(int hProcess, uint lpAddress, int dwSize, uint flNewProtect, out int lpflOldProtect);
 
@@ -101,7 +104,7 @@ namespace LoLCustomSharp
         }
         internal void WriteMemory(uint address, byte[] buffer)
         {
-            if (!WriteProcessMemory(this.hProcess, address, buffer, buffer.Length, out uint _))
+            if (NtWriteVirtualMemory(this.hProcess, address, buffer, buffer.Length, out uint _) != 0)
             {
                 throw new IOException("Failed to write memory");
             }
