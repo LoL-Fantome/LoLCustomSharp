@@ -16,7 +16,7 @@ namespace LoLCustomSharp
 
         private const uint INFINITE = 0xFFFFFFFF;
 
-        private const uint PAGE_EXECUTE = 0x10;
+        private const uint PAGE_EXECUTE_READ = 0x20;
         private const uint PAGE_READWRITE = 0x04;
 
         private const uint MEM_COMMIT = 0x00001000;
@@ -111,7 +111,7 @@ namespace LoLCustomSharp
         }
         internal void MarkMemoryExecutable(uint address, int size)
         {
-            if (!VirtualProtectEx(this.hProcess, address, size, PAGE_EXECUTE, out int _))
+            if (!VirtualProtectEx(this.hProcess, address, size, PAGE_EXECUTE_READ, out int _))
             {
                 throw new IOException("Failed to mark region as executable");
             }
@@ -139,6 +139,16 @@ namespace LoLCustomSharp
                 ReadProcessMemory(this.hProcess, address, buffer, 4, out uint _); //This can fail sometimes
             } while (buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 && buffer[3] == 0);
             return BitConverter.ToUInt32(buffer, 0);
+        }
+
+        internal void WaitPointerEquals(uint address, uint what)
+        {
+            byte[] buffer = new byte[4];
+            do
+            {
+                Thread.Sleep(1);
+                ReadProcessMemory(this.hProcess, address, buffer, 4, out uint _); //This can fail sometimes
+            } while (BitConverter.ToUInt32(buffer, 0) != what);
         }
 
         internal uint Allocate<T>() where T : struct

@@ -12,10 +12,17 @@ namespace LoLCustomSharp
         private readonly bool[] _wildcard;
         private readonly int _offset;
 
-        public SigScanner(string pattern, int offset = 0)
+        private SigScanner(byte[] pattern, bool[] wildcard, int offset)
         {
-            string[] chars = pattern.Split(' ');
-            this._pattern = chars.Select((x) =>
+            _pattern = pattern;
+            _wildcard = wildcard;
+            _offset = offset;
+        }
+
+        public static SigScanner Pattern(string data, int offset = 0)
+        {
+            string[] chars = data.Split(' ');
+            byte[] pattern = chars.Select((x) =>
             {
                 if (x == "??" || x == "?")
                 {
@@ -23,11 +30,26 @@ namespace LoLCustomSharp
                 }
                 return byte.Parse(x, NumberStyles.HexNumber);
             }).ToArray();
-            this._wildcard = chars.Select((x) =>
+            bool[] wildcard = chars.Select((x) =>
             {
                 return x == "??" || x == "?";
             }).ToArray();
-            this._offset = offset;
+            return new SigScanner(pattern, wildcard, offset);
+        }
+
+        public static SigScanner ExactBytes(byte[] data, int offset = 0)
+        {
+            return new SigScanner(data, new bool[data.Length], offset);
+        }
+
+        public static SigScanner ExactString(string data, int offset = 0)
+        {
+            return ExactBytes(Encoding.ASCII.GetBytes(data), offset);
+        }
+
+        public static SigScanner ExactInt(int data, int offset = 0)
+        {
+            return ExactBytes(BitConverter.GetBytes(data), offset);
         }
 
         public int Find(byte[] data)
@@ -35,7 +57,8 @@ namespace LoLCustomSharp
             int[] skipTable = new int[256];
             int lastIndex = this._pattern.Length - 1;
 
-            int safeSkip = Math.Max(lastIndex - Array.LastIndexOf(this._wildcard, true), 1);
+            var lastWildCard = Array.LastIndexOf(this._wildcard, true);
+            int safeSkip = Math.Max(lastWildCard == -1 ? 0 : lastIndex - lastWildCard, 1);
             for (int i = 0; i < skipTable.Length; i++)
             {
                 skipTable[i] = safeSkip;

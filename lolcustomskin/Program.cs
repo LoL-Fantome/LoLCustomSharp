@@ -20,12 +20,9 @@ namespace lolcustomskin
             string exePath = Assembly.GetEntryAssembly().Location;
             string configPath = Path.GetDirectoryName(exePath) + "/lolcustomskin-sharp.bin";
             OverlayPatcher patcher = new OverlayPatcher();
-
-            Console.WriteLine($"Overlay: {patcher.Prefix}");
-            Console.WriteLine($"Offsets: 0x{patcher.Checksum:X08} 0x{patcher.FileProviderListOffset:X08} 0x{patcher.PMethArrayOffset:X08}");
-            Console.WriteLine("Waiting for league to start...");
-
-            patcher.Start(args.Length > 0 ? args[0] : "MOD/", null, null);
+            patcher.Start(args.Length > 0 ? args[0] : "MOD/", (msg) => Console.WriteLine(msg), (err) => Console.WriteLine(err.StackTrace));
+            patcher.Join();
+            Console.ReadKey();
         }
     }
 }
