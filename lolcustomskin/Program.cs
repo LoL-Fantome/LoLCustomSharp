@@ -15,12 +15,23 @@ namespace lolcustomskin
 {
     class Program
     {
+        static void MessageHandler(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        static void ErrorHandler(Exception error)
+        {
+            Console.WriteLine(error.Message);
+            Console.WriteLine(error.StackTrace);
+        }
+
         static void Main(string[] args)
         {
             string exePath = Assembly.GetEntryAssembly().Location;
             string configPath = Path.GetDirectoryName(exePath) + "/lolcustomskin-sharp.bin";
-            OverlayPatcher patcher = new OverlayPatcher();
-            patcher.Start(args.Length > 0 ? args[0] : "MOD/", (msg) => Console.WriteLine(msg), (err) => Console.WriteLine(err.StackTrace));
+            OverlayPatcher patcher = new OverlayPatcher(configPath);
+            patcher.Start(args.Length > 0 ? args[0] : "MOD/", MessageHandler, ErrorHandler);
             patcher.Join();
             Console.ReadKey();
         }
