@@ -37,7 +37,7 @@ namespace LoLCustomSharp
 
         private static readonly SigScanner PAT_CreateFileA_CALL = SigScanner.Pattern("6A 03 68 00 00 00 C0 68 ?? ?? ?? ?? FF 15", 14);
 
-        private static readonly SigScanner PAT_ReturnAddress = SigScanner.Pattern("56 8B CF E8 ?? ?? ?? ?? 84 C0 75 12", 8);
+        private static readonly SigScanner PAT_ReturnAddress = SigScanner.Pattern("57 8B CB E8 ?? ?? ?? ?? 84 C0 75 12", 8);
 
         private static readonly SigScanner PAT_FreePointerOffset = SigScanner.Pattern("A1 ?? ?? ?? ?? 85 C0 74 09 3D ?? ?? ?? ?? 74 02 FF E0 FF 74 24 04 E8", 1);
 
